@@ -106,7 +106,7 @@ public class Game {
         //選擇是否繼續抽牌
         while(time!=0)
         {
-            if(x==0&&playerhad<=5&&(playerPoint<=11&&playerPoint>=-11))
+            if(x==0&&playerhad<5&&(playerPoint<=11&&playerPoint>=-11))
             {
                 Scanner scanner = new Scanner(System.in);
                 System.out.println("Do you want to draw a card? (Y/N)");
