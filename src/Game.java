@@ -48,6 +48,12 @@ public class Game {
         else return false;
     }
 
+    static boolean botWantToRaise(int point,int money)
+    {
+        if(point<6&&point>-5&&money/2>=0) return true;
+        else return false;
+    }
+
     //抽牌funtion
     static int drawCard(HashMap<String,Tuple<ArrayList<Integer>,ArrayList<Integer>>> playerCard,Boolean[][] deck,String player,int playerPoint)
     {
@@ -76,6 +82,13 @@ public class Game {
         String[] Suit= {"Spade","Heart","Diamond","Club"};
         int playerPoint=0,bot1Point=0,bot2Point=0,bot3Point=0;
         int playerhad=1,bot1had=1,bot2had=1,bot3had=1;
+        int[] playerTotalMoney={1000,1000,1000,1000};
+        int[] playerBet={0,0,0,0};
+        int pot=0;
+        int mostCard=0,temp=0;
+        Boolean[] outBound={false,false,false,false};
+        boolean[] draw={false,false,false,false};
+        boolean[] win={false,false,false,false};
         HashMap<String,Tuple<ArrayList<Integer>,ArrayList<Integer>>> playerCard=new HashMap<String,Tuple<ArrayList<Integer>,ArrayList<Integer>>>();
         playerCard.put(player,new Tuple<ArrayList<Integer>,ArrayList<Integer>>(new ArrayList<Integer>(),new ArrayList<Integer>()));
         playerCard.put(bot1,new Tuple<ArrayList<Integer>,ArrayList<Integer>>(new ArrayList<Integer>(),new ArrayList<Integer>()));
@@ -99,6 +112,60 @@ public class Game {
             else if(x==1) bot1Point+=drawCard(playerCard,deck,bot1,0);
             else if(x==2) bot2Point+=drawCard(playerCard,deck,bot2,0);
             else if(x==3) bot3Point+=drawCard(playerCard,deck,bot3,0);
+            pot+=100;
+            playerTotalMoney[x]-=100;
+            playerBet[x]+=100;
+            x++;
+            x%=4;
+        }
+        time=4;
+        //加注
+        while(time--!=0)
+        {
+            if(x==0)
+            {
+                Scanner scanner = new Scanner(System.in);
+                System.out.println("Do you want to raise? (Y/N)");
+                System.out.println(player+" 's point:"+playerPoint);
+                String input = scanner.nextLine();
+                if(input.equals("Y"))
+                {
+                    System.out.println("How much do you want to raise?");
+                    int raise=scanner.nextInt();
+                    if(raise>playerTotalMoney[x])
+                    {
+                        System.out.println("You don't have enough money");
+                        time--;
+                        x++;
+                        x%=4;
+                        continue;
+                    }
+                    playerBet[x]+=raise;
+                    pot+=raise;
+                    playerTotalMoney[x]-=raise;
+                }
+            }
+            else if(x==1&&botWantToRaise(bot1Point,playerTotalMoney[x]))
+            {
+                int raise=rand.nextInt(250);
+                playerBet[x]+=raise;
+                pot+=raise;
+                playerTotalMoney[x]-=raise;
+            }
+            else if(x==2&&botWantToRaise(bot2Point,playerTotalMoney[x]))
+            {
+                int raise=rand.nextInt(250);
+                playerBet[x]+=raise;
+                pot+=raise;
+                playerTotalMoney[x]-=raise;
+            }
+            else if(x==3&&botWantToRaise(bot3Point,playerTotalMoney[x]))
+            {
+                int raise=rand.nextInt(250);
+                playerBet[x]+=raise;
+                pot+=raise;
+                playerTotalMoney[x]-=raise;
+            }
             x++;
             x%=4;
         }
@@ -163,19 +230,54 @@ public class Game {
         bot1Point=Math.abs(bot1Point);
         bot2Point=Math.abs(bot2Point);
         bot3Point=Math.abs(bot3Point);
+
+        if(playerPoint>11) outBound[0]=true;
+        if(bot1Point>11) outBound[1]=true;
+        if(bot2Point>11) outBound[2]=true;
+        if(bot3Point>11) outBound[3]=true;
+
         System.out.println(player+" 's point:"+playerPoint);
         System.out.println(bot1+" 's point:"+bot1Point);
         System.out.println(bot2+" 's point:"+bot2Point);
         System.out.println(bot3+" 's point:"+bot3Point);
         int winnable=Math.min(playerPoint,Math.min(bot1Point,Math.min(bot2Point,bot3Point)));
         if(winnable>11) winnable=-1;
-        boolean[] win={false,false,false,false};
+        
         if(playerPoint==winnable) win[0]=true;
         if(bot1Point==winnable) win[1]=true;
         if(bot2Point==winnable) win[2]=true;
         if(bot3Point==winnable) win[3]=true;
-        int mostCard=0,temp=0;
-        boolean[] draw={false,false,false,false};
+        
+        
+
+        //處理爆的人double
+        for(int i=0;i<4;++i)
+        {
+            if(outBound[i])
+            {
+                if(i==0) 
+                {
+                    playerTotalMoney[i]-=playerBet[i];
+                    pot+=playerBet[i];
+                }
+                else if(i==1) 
+                {
+                    playerTotalMoney[i]-=playerBet[i];
+                    pot+=playerBet[i];
+                }
+                else if(i==2) 
+                {
+                    playerTotalMoney[i]-=playerBet[i];
+                    pot+=playerBet[i];
+                }
+                else if(i==3) 
+                {
+                    playerTotalMoney[i]-=playerBet[i];
+                    pot+=playerBet[i];
+                }
+            }
+        }
+        //分勝負
         for(int i=0;i<4;++i)
         {
             if(win[i]) 
@@ -187,16 +289,36 @@ public class Game {
                 temp++;
             }
         }
-        if(temp==1)
+        if(winnable==-1)
+        {
+            System.out.println("No one win");
+        }
+        else if(temp==1)
         {
             for(int i=0;i<4;++i)
             {
                 if(win[i]) 
                 {
-                    if(i==0) System.out.println(player+" win");
-                    else if(i==1) System.out.println(bot1+" win");
-                    else if(i==2) System.out.println(bot2+" win");
-                    else if(i==3) System.out.println(bot3+" win");
+                    if(i==0) 
+                    {
+                        System.out.println(player+" win");
+                        playerTotalMoney[i]+=pot;
+                    }
+                    else if(i==1) 
+                    {
+                        System.out.println(bot1+" win");
+                        playerTotalMoney[i]+=pot;
+                    }
+                    else if(i==2) 
+                    {
+                        System.out.println(bot2+" win");
+                        playerTotalMoney[i]+=pot;
+                    }
+                    else if(i==3) 
+                    {
+                        System.out.println(bot3+" win");
+                        playerTotalMoney[i]+=pot;
+                    }
                 }
             }
         }
@@ -235,10 +357,26 @@ public class Game {
                 {
                     if(draw[i]) 
                     {
-                        if(i==0) System.out.println(player+" win");
-                        else if(i==1) System.out.println(bot1+" win");
-                        else if(i==2) System.out.println(bot2+" win");
-                        else if(i==3) System.out.println(bot3+" win");
+                        if(i==0) 
+                        {
+                            System.out.println(player+" win");
+                            playerTotalMoney[i]+=pot;
+                        }
+                        else if(i==1) 
+                        {
+                            System.out.println(bot1+" win");
+                            playerTotalMoney[i]+=pot;
+                        }
+                        else if(i==2) 
+                        {
+                            System.out.println(bot2+" win");
+                            playerTotalMoney[i]+=pot;
+                        }
+                        else if(i==3) 
+                        {
+                            System.out.println(bot3+" win");
+                            playerTotalMoney[i]+=pot;
+                        }
                     }
                 }
             }
@@ -248,18 +386,38 @@ public class Game {
                 {
                     if(draw[i]) 
                     {
-                        if(i==0) System.out.println(player+" draw");
-                        else if(i==1) System.out.println(bot1+" draw");
-                        else if(i==2) System.out.println(bot2+" draw");
-                        else if(i==3) System.out.println(bot3+" draw");
+                        if(i==0) 
+                        {
+                            System.out.println(player+" draw");
+                            playerTotalMoney[i]+=pot/count;
+                        }
+                        else if(i==1) 
+                        {
+                            System.out.println(bot1+" draw");
+                            playerTotalMoney[i]+=pot/count;
+                        }
+                        else if(i==2) 
+                        {
+                            System.out.println(bot2+" draw");
+                            playerTotalMoney[i]+=pot/count;
+                        }
+                        else if(i==3) 
+                        {
+                            System.out.println(bot3+" draw");
+                            playerTotalMoney[i]+=pot/count;
+                        }
                     }
                 }
             }
         }
-        else if(winnable==-1)
+        //印出每個人的錢
+        for(int i=0;i<4;++i)
         {
-            System.out.println("No one win");
+            if(i==0) System.out.println(player+" 's money:"+playerTotalMoney[i]);
+            else if(i==1) System.out.println(bot1+" 's money:"+playerTotalMoney[i]);
+            else if(i==2) System.out.println(bot2+" 's money:"+playerTotalMoney[i]);
+            else if(i==3) System.out.println(bot3+" 's money:"+playerTotalMoney[i]);
         }
-
+        pot=0;
     }
 }
