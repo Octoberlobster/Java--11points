@@ -1,85 +1,194 @@
 ﻿package src;
-
 import java.util.Scanner;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Random;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
-public class Game {
-    //計算點數
-    static int countpoint(int rank)
-    {
-        if((rank+1)%2==0)
+//Pair
+class Tuple<X, Y> {
+    public X x;
+    public Y y;
+    public Tuple(X x, Y y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+class MyJFrame extends JFrame implements ActionListener,Runnable{ 
+    
+    private JPanel contentPane;
+    public JPanel MainPanel;
+    public  boolean draw=false;
+    public  boolean raise=false;
+    public JButton Draw = new JButton("抽牌");
+    private JButton Raise = new JButton("加注");
+    JLabel countdown = new JLabel();
+    JLabel hint=new JLabel();
+    JLabel icon=new JLabel();
+    JLabel ficon=new JLabel();
+    @Override
+    public void run() {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 30, 1280, 720);
+        contentPane = new JPanel();
+        MainPanel = new JPanel();
+        
+        MainPanel.setVisible(false);
+        contentPane.setLayout(null);
+        setContentPane(contentPane);
+    
+        JButton Start = new JButton("開始遊戲");
+        Start.setBounds(590, 360, 100, 60);
+        contentPane.add(Start);
+        Start.addActionListener(this);
+    
+        JButton Rule = new JButton("規則說明");
+        Rule.setBounds(590, 460, 100, 60);
+        contentPane.add(Rule);
+        Rule.addActionListener(this);
+    
+        JLabel label = new JLabel("歡迎來到11點遊戲");
+        label.setBounds(590, 260, 100, 60);
+         contentPane.add(label);
+    
+        JButton Exit = new JButton("離開遊戲");
+        Exit.setBounds(590, 560, 100, 60);
+        contentPane.add(Exit);
+        Exit.addActionListener(this);
+    
+            
+    
+        setTitle("Java project");
+        setVisible(true);
+        
+    }
+    public void actionPerformed(ActionEvent e) {
+        if(e.getActionCommand().equals("開始遊戲")){
+            MainPanel.setVisible(true);
+            contentPane.setVisible(false);
+            setContentPane(MainPanel);
+            MainPanel.setLayout(null);
+            
+            MainPanel.add(Draw);
+            Draw.setBounds(1000, 600, 100, 60);
+            Draw.addActionListener(this);
+            
+            MainPanel.add(Raise);
+            Raise.setBounds(1000, 500, 100, 60);
+            Raise.addActionListener(this);
+            MyGame game = new MyGame();
+            game.frame=this;
+            //在螢幕上顯示倒數與tiger的牌
+            countdown.setBounds(1000, 400, 100, 60);
+            MainPanel.add(countdown);
+
+            hint.setBounds(500, 300, 300, 60);
+            MainPanel.add(hint);
+
+            //修改為相對路徑
+            icon.setIcon(new ImageIcon("Java--11points/src/image/back.png"));
+            icon.setBounds(100, 100, 300, 300);
+            icon.setBorder(BorderFactory.createLineBorder(Color.black, 2));
+            MainPanel.add(icon);
+            
+            ficon.setText("tiger's card");
+            ficon.setBounds(500, 100, 300, 300);
+            MainPanel.add(ficon);
+
+
+            game.start();
+        }
+        else if(e.getActionCommand().equals("規則說明")){
+            JOptionPane.showMessageDialog(null, "1. 遊戲開始時，每位玩家和電腦各抽一張牌，並下注100元\n2. 玩家和電腦可以選擇是否要加注\n3. 玩家和電腦可以選擇是否要抽牌\n4. 玩家和電腦最多可以抽5張牌\n5. 玩家和電腦的點數最接近11點的人獲勝\n6. 如果有兩位以上的人點數相同，則看誰持有的牌數最多，再相同則平手", "規則說明", JOptionPane.INFORMATION_MESSAGE);
+        }
+        else if(e.getActionCommand().equals("離開遊戲")){
+            System.exit(0);
+        }
+        else if(e.getActionCommand().equals("抽牌")){
+            draw=true;
+        }
+        else if(e.getActionCommand().equals("加注")){
+            Raise.setEnabled(false);
+            raise=true;
+        }
+    }
+}
+
+
+class MyGame extends Thread {
+    
+        //計算點數
+        static int countpoint(int rank)
         {
-            if(rank+1>10)
+            if((rank+1)%2==0)
             {
-                return -10;
+                if(rank+1>10)
+                {
+                    return -10;
+                }
+                else
+                {
+                    return -(rank+1);
+                }
             }
             else
             {
-                return -(rank+1);
+                if(rank+1>10)
+                {
+                    return 10;
+                }
+                else
+                {
+                    return (rank+1);
+                }
             }
         }
-        else
+        
+        //機器人是否要抽牌
+        static boolean botWantToDraw(int point)
         {
-            if(rank+1>10)
-            {
-                return 10;
-            }
-            else
-            {
-                return (rank+1);
-            }
+            if(point>=6||point<=-5) return true;
+            else return false;
         }
-    }
-    //Pair
-    public static class Tuple<X, Y> {
-        public X x;
-        public Y y;
-        public Tuple(X x, Y y) {
-            this.x = x;
-            this.y = y;
-        }
-    }
-    //機器人是否要抽牌
-    static boolean botWantToDraw(int point)
-    {
-        if(point>=6||point<=-5) return true;
-        else return false;
-    }
-
-    static boolean botWantToRaise(int point,int money)
-    {
-        if(point<6&&point>-5&&money/2>=0) return true;
-        else return false;
-    }
-
-    //抽牌funtion
-    static int drawCard(HashMap<String,Tuple<ArrayList<Integer>,ArrayList<Integer>>> playerCard,Boolean[][] deck,String player,int playerPoint)
-    {
-        Random rand=new Random();
-        int suit=rand.nextInt(4);
-        int rank=rand.nextInt(13);
-        while(deck[suit][rank])
+    
+        static boolean botWantToRaise(int point,int money)
         {
-            suit=rand.nextInt(4);
-            rank=rand.nextInt(13);
+            if(point<6&&point>-5&&money/2>=0) return true;
+            else return false;
         }
-        deck[suit][rank]=true;
-        Tuple<ArrayList<Integer>,ArrayList<Integer>> tuple=playerCard.get(player);
-        tuple.x.add(suit);
-        tuple.y.add(rank);
-        playerCard.put(player,tuple);
-        playerPoint+=countpoint(rank);
-        return playerPoint;
-    }
-
-
-    public static void main(String[] args) {
+    
+        //抽牌funtion
+        static int drawCard(HashMap<String,Tuple<ArrayList<Integer>,ArrayList<Integer>>> playerCard,Boolean[][] deck,String player,int playerPoint)
+        {
+            Random rand=new Random();
+            int suit=rand.nextInt(4);
+            int rank=rand.nextInt(13);
+            while(deck[suit][rank])
+            {
+                suit=rand.nextInt(4);
+                rank=rand.nextInt(13);
+            }
+            deck[suit][rank]=true;
+            Tuple<ArrayList<Integer>,ArrayList<Integer>> tuple=playerCard.get(player);
+            tuple.x.add(suit);
+            tuple.y.add(rank);
+            playerCard.put(player,tuple);
+            playerPoint+=countpoint(rank);
+            return playerPoint;
+        }
+    
+        MyJFrame frame;
         String player="tiger";
         String bot1="bot1",bot2="bot2",bot3="bot3";
         Boolean[][] deck=new Boolean[4][13];
-        String[] Suit= {"Spade","Heart","Diamond","Club"};
+        String[] Suit= {"flower","heart","square","black"};
         int playerPoint=0,bot1Point=0,bot2Point=0,bot3Point=0;
         int playerhad=1,bot1had=1,bot2had=1,bot3had=1;
         int[] playerTotalMoney={1000,1000,1000,1000};
@@ -87,9 +196,13 @@ public class Game {
         int pot=0;
         int mostCard=0,temp=0;
         Boolean[] outBound={false,false,false,false};
-        boolean[] draw={false,false,false,false};
+        boolean[] tie={false,false,false,false};
         boolean[] win={false,false,false,false};
         HashMap<String,Tuple<ArrayList<Integer>,ArrayList<Integer>>> playerCard=new HashMap<String,Tuple<ArrayList<Integer>,ArrayList<Integer>>>();
+
+    @Override
+    public void run()
+    {
         playerCard.put(player,new Tuple<ArrayList<Integer>,ArrayList<Integer>>(new ArrayList<Integer>(),new ArrayList<Integer>()));
         playerCard.put(bot1,new Tuple<ArrayList<Integer>,ArrayList<Integer>>(new ArrayList<Integer>(),new ArrayList<Integer>()));
         playerCard.put(bot2,new Tuple<ArrayList<Integer>,ArrayList<Integer>>(new ArrayList<Integer>(),new ArrayList<Integer>()));
@@ -119,27 +232,42 @@ public class Game {
             x%=4;
         }
         time=4;
+        //顯示tiger的牌
+        for(String key:playerCard.keySet())
+        {
+            if(key.equals(player))
+            {
+                Tuple<ArrayList<Integer>,ArrayList<Integer>> tuple=playerCard.get(key);
+                for(int i=0;i<tuple.x.size();++i)
+                {
+                    System.out.println(Suit[tuple.x.get(i)]+(tuple.y.get(i)+1));
+                    frame.ficon.setIcon(new ImageIcon("image/"+Suit[tuple.x.get(i)]+(tuple.y.get(i)+1)+".png"));
+                    frame.ficon.setBounds(500, 100, 300, 300);
+                    frame.MainPanel.add(frame.ficon);
+                }
+            }
+        }
+        //如果按下加注按鈕就繼續，暫停game20秒
+        frame.hint.setText("請選擇是否加注");
+        int tempTime=20;
+        while(!frame.raise&&tempTime!=-1)
+        {
+            frame.countdown.setText("剩餘時間:"+tempTime);
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            tempTime--;
+        }
         //加注
         while(time--!=0)
         {
             if(x==0)
             {
-                Scanner scanner = new Scanner(System.in);
-                System.out.println("Do you want to raise? (Y/N)");
-                System.out.println(player+" 's point:"+playerPoint);
-                String input = scanner.nextLine();
-                if(input.equals("Y"))
+                if(frame.raise)
                 {
-                    System.out.println("How much do you want to raise?");
-                    int raise=scanner.nextInt();
-                    if(raise>playerTotalMoney[x])
-                    {
-                        System.out.println("You don't have enough money");
-                        time--;
-                        x++;
-                        x%=4;
-                        continue;
-                    }
+                    int raise = 100;
                     playerBet[x]+=raise;
                     pot+=raise;
                     playerTotalMoney[x]-=raise;
@@ -166,6 +294,7 @@ public class Game {
                 pot+=raise;
                 playerTotalMoney[x]-=raise;
             }
+            time--;
             x++;
             x%=4;
         }
@@ -175,20 +304,23 @@ public class Game {
         {
             if(x==0&&playerhad<5&&(playerPoint<=11&&playerPoint>=-11))
             {
-                Scanner scanner = new Scanner(System.in);
-                System.out.println("Do you want to draw a card? (Y/N)");
-                System.out.println(player+" 's point:"+playerPoint);
-                String input = scanner.nextLine();
-                if(input.equals("Y"))
+                frame.hint.setText("請選擇是否抽牌\r\n當前點數為:"+playerPoint);
+                tempTime=20;
+                while(!frame.raise&&tempTime!=-1)
                 {
-                    playerPoint+=drawCard(playerCard,deck,player,0);
-                    playerhad++;
+                    frame.countdown.setText("剩餘時間:"+tempTime);
+                    try {
+                        TimeUnit.SECONDS.sleep(1);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    tempTime--;
                 }
-                else
+                if(frame.draw)
                 {
-                    time--;
-                    x++;
-                    x%=4;
+                    playerPoint+=drawCard(playerCard,deck,player,playerPoint);
+                    playerhad++;
+                    frame.draw=false;
                 }
             }
             else if(x==1&&botWantToDraw(bot1Point)&&bot1had<=5&&(bot1Point<=11&&bot1Point>=-11))
@@ -230,6 +362,8 @@ public class Game {
         bot1Point=Math.abs(bot1Point);
         bot2Point=Math.abs(bot2Point);
         bot3Point=Math.abs(bot3Point);
+
+        frame.hint.setText("玩家點數:"+playerPoint);
 
         if(playerPoint>11) outBound[0]=true;
         if(bot1Point>11) outBound[1]=true;
@@ -331,22 +465,22 @@ public class Game {
                 {
                     if(i==0&&playerhad==mostCard) 
                     {
-                        draw[i]=true;
+                        tie[i]=true;
                         count++;
                     }
                     else if(i==1&&bot1had==mostCard) 
                     {
-                        draw[i]=true;
+                        tie[i]=true;
                         count++;
                     }
                     else if(i==2&&bot2had==mostCard) 
                     {
-                        draw[i]=true;
+                        tie[i]=true;
                         count++;
                     }
                     else if(i==3&&bot3had==mostCard) 
                     {
-                        draw[i]=true;
+                        tie[i]=true;
                         count++;
                     }
                 }
@@ -355,7 +489,7 @@ public class Game {
             {
                 for(int i=0;i<4;++i)
                 {
-                    if(draw[i]) 
+                    if(tie[i]) 
                     {
                         if(i==0) 
                         {
@@ -384,26 +518,26 @@ public class Game {
             {
                 for(int i=0;i<4;++i)
                 {
-                    if(draw[i]) 
+                    if(tie[i]) 
                     {
                         if(i==0) 
                         {
-                            System.out.println(player+" draw");
+                            System.out.println(player+" tie");
                             playerTotalMoney[i]+=pot/count;
                         }
                         else if(i==1) 
                         {
-                            System.out.println(bot1+" draw");
+                            System.out.println(bot1+" tie");
                             playerTotalMoney[i]+=pot/count;
                         }
                         else if(i==2) 
                         {
-                            System.out.println(bot2+" draw");
+                            System.out.println(bot2+" tie");
                             playerTotalMoney[i]+=pot/count;
                         }
                         else if(i==3) 
                         {
-                            System.out.println(bot3+" draw");
+                            System.out.println(bot3+" tie");
                             playerTotalMoney[i]+=pot/count;
                         }
                     }
@@ -419,5 +553,13 @@ public class Game {
             else if(i==3) System.out.println(bot3+" 's money:"+playerTotalMoney[i]);
         }
         pot=0;
+    }
+    
+}
+
+public class Game extends JPanel{
+    public static void main(String[] args) {
+        MyJFrame window = new MyJFrame();
+        window.run();  
     }
 }
