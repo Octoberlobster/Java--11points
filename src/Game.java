@@ -11,7 +11,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-//fffffffffffff
 
 //Pair
 class Tuple<X, Y> {
@@ -33,7 +32,6 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
     private JButton Raise = new JButton("加注");
     JLabel countdown = new JLabel();
     JLabel hint=new JLabel();
-    JLabel icon=new JLabel();
     JLabel ficon=new JLabel();
     @Override
     public void run() {
@@ -94,11 +92,6 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
             hint.setBounds(500, 300, 300, 60);
             MainPanel.add(hint);
 
-            //修改為相對路徑
-            icon.setIcon(new ImageIcon("Java--11points/src/image/back.png"));
-            icon.setBounds(100, 100, 300, 300);
-            icon.setBorder(BorderFactory.createLineBorder(Color.black, 2));
-            MainPanel.add(icon);
             
             ficon.setText("tiger's card");
             ficon.setBounds(500, 100, 300, 300);
@@ -243,7 +236,7 @@ class MyGame extends Thread {
                 for(int i=0;i<tuple.x.size();++i)
                 {
                     System.out.println(Suit[tuple.x.get(i)]+(tuple.y.get(i)+1));
-                    frame.ficon.setIcon(new ImageIcon("image/"+Suit[tuple.x.get(i)]+(tuple.y.get(i)+1)+".png"));
+                    frame.ficon.setIcon(new ImageIcon("Java--11points/src/image/"+Suit[tuple.x.get(i)]+(tuple.y.get(i)+1)+".png"));
                     frame.ficon.setBounds(500, 100, 300, 300);
                     frame.MainPanel.add(frame.ficon);
                 }
@@ -308,7 +301,7 @@ class MyGame extends Thread {
             {
                 frame.hint.setText("請選擇是否抽牌\r\n當前點數為:"+playerPoint);
                 tempTime=20;
-                while(!frame.raise&&tempTime!=-1)
+                while(!frame.draw&&tempTime!=-1)
                 {
                     frame.countdown.setText("剩餘時間:"+tempTime);
                     try {
