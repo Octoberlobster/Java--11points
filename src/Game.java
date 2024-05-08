@@ -28,14 +28,18 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
     public JPanel MainPanel;
     public  boolean draw=false;
     public  boolean raise=false;
-    public JButton Draw = new JButton("抽牌");
-    private JButton Raise = new JButton("加注");
+    JButton Draw = new JButton("抽牌");
+    JButton NoDraw = new JButton("不抽牌");
+    JButton Raise = new JButton("加注");
+    JButton NoRaise = new JButton("不加注");
     JLabel countdown = new JLabel();
     JLabel hint=new JLabel();
-    JLabel ficon=new JLabel();
+    JLabel[] playerMoney=new JLabel[4];
+    JLabel[] card=new JLabel[6];
     @Override
     public void run() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false);
         setBounds(100, 30, 1280, 720);
         contentPane = new JPanel();
         MainPanel = new JPanel();
@@ -77,26 +81,47 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
             MainPanel.setLayout(null);
             
             MainPanel.add(Draw);
-            Draw.setBounds(1000, 600, 100, 60);
+            Draw.setBounds(1020, 600, 100, 60);
+            Draw.setEnabled(false);
             Draw.addActionListener(this);
+
+            MainPanel.add(NoDraw);
+            NoDraw.setBounds(1140, 600, 100, 60);
+            NoDraw.setEnabled(false);
+            NoDraw.addActionListener(this);
             
             MainPanel.add(Raise);
-            Raise.setBounds(1000, 500, 100, 60);
+            Raise.setBounds(1020, 500, 100, 60);
             Raise.addActionListener(this);
+
+            MainPanel.add(NoRaise);
+            NoRaise.setBounds(1140, 500, 100, 60);
+            NoRaise.addActionListener(this);
+
+            
+
             MyGame game = new MyGame();
             game.frame=this;
-            //在螢幕上顯示倒數與tiger的牌
-            countdown.setBounds(1000, 400, 100, 60);
+
+
+            countdown.setBounds(1080, 400, 100, 60);
             MainPanel.add(countdown);
 
             hint.setBounds(500, 300, 300, 60);
             MainPanel.add(hint);
 
-            
-            ficon.setText("tiger's card");
-            ficon.setBounds(500, 100, 300, 300);
-            MainPanel.add(ficon);
+            for(int i=0;i<4;++i)
+            {
+                playerMoney[i]=new JLabel();
+                playerMoney[i].setBounds(1000, 100+i*100, 100, 60);
+                MainPanel.add(playerMoney[i]);
+            }
 
+            for(int i=1;i<=5;++i)
+            {
+                card[i]=new JLabel();
+                MainPanel.add(card[i]);
+            }
 
             game.start();
         }
@@ -112,6 +137,19 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
         else if(e.getActionCommand().equals("加注")){
             Raise.setEnabled(false);
             raise=true;
+            NoRaise.setEnabled(false);
+            Draw.setEnabled(true);
+            NoDraw.setEnabled(true);
+        }
+        else if(e.getActionCommand().equals("不抽牌")){
+            NoDraw.setEnabled(false);
+            Draw.setEnabled(false);
+        }
+        else if(e.getActionCommand().equals("不加注")){
+            NoRaise.setEnabled(false);
+            Raise.setEnabled(false);
+            Draw.setEnabled(true);
+            NoDraw.setEnabled(true);
         }
     }
 }
@@ -209,6 +247,7 @@ class MyGame extends Thread {
                 deck[i][j]=false;
             }
         }
+        frame.playerMoney[0].setText(player+"玩家:"+playerTotalMoney[0]);
         //隨機一個人開始抽牌各抽一張
         Random rand=new Random();
         int x=rand.nextInt(4);
@@ -234,18 +273,21 @@ class MyGame extends Thread {
             {
                 Tuple<ArrayList<Integer>,ArrayList<Integer>> tuple=playerCard.get(key);
                 for(int i=0;i<tuple.x.size();++i)
-                {
-                    System.out.println(Suit[tuple.x.get(i)]+(tuple.y.get(i)+1));
-                    frame.ficon.setIcon(new ImageIcon("Java--11points/src/image/"+Suit[tuple.x.get(i)]+(tuple.y.get(i)+1)+".png"));
-                    frame.ficon.setBounds(500, 100, 300, 300);
-                    frame.MainPanel.add(frame.ficon);
+                {   
+                    ImageIcon icon = new ImageIcon("Java--11points/src/image/"+Suit[tuple.x.get(i)]+(tuple.y.get(i)+1)+".png");
+                    Image img = icon.getImage();
+                    Image newimg = img.getScaledInstance(120, 160,  java.awt.Image.SCALE_SMOOTH);
+                    icon = new ImageIcon(newimg);
+                    frame.card[playerhad].setIcon(icon);
+                    frame.card[playerhad].setBorder(BorderFactory.createLineBorder(Color.black, 1));
+                    frame.card[playerhad].setBounds(260, 450, 120, 160);
                 }
             }
         }
         //如果按下加注按鈕就繼續，暫停game20秒
         frame.hint.setText("請選擇是否加注");
         int tempTime=20;
-        while(!frame.raise&&tempTime!=-1)
+        while(!frame.raise&&tempTime!=-1&&!frame.Draw.isEnabled())
         {
             frame.countdown.setText("剩餘時間:"+tempTime);
             try {
@@ -299,9 +341,9 @@ class MyGame extends Thread {
         {
             if(x==0&&playerhad<5&&(playerPoint<=11&&playerPoint>=-11))
             {
-                frame.hint.setText("請選擇是否抽牌\r\n當前點數為:"+playerPoint);
+                frame.hint.setText("請選擇是否抽牌 當前點數為:"+playerPoint);
                 tempTime=20;
-                while(!frame.draw&&tempTime!=-1)
+                while(!frame.draw&&tempTime!=-1&&frame.NoDraw.isEnabled())
                 {
                     frame.countdown.setText("剩餘時間:"+tempTime);
                     try {
@@ -313,9 +355,32 @@ class MyGame extends Thread {
                 }
                 if(frame.draw)
                 {
-                    playerPoint+=drawCard(playerCard,deck,player,playerPoint);
+                    playerPoint=drawCard(playerCard,deck,player,playerPoint);
                     playerhad++;
                     frame.draw=false;
+                    for(String key:playerCard.keySet())
+                    {
+                        if(key.equals(player))
+                        {
+                            Tuple<ArrayList<Integer>,ArrayList<Integer>> tuple=playerCard.get(key);
+                            for(int i=0;i<tuple.x.size();++i)
+                            {   
+                                ImageIcon icon = new ImageIcon("Java--11points/src/image/"+Suit[tuple.x.get(i)]+(tuple.y.get(i)+1)+".png");
+                                Image img = icon.getImage();
+                                Image newimg = img.getScaledInstance(120, 160,  java.awt.Image.SCALE_SMOOTH);
+                                icon = new ImageIcon(newimg);
+                                frame.card[playerhad].setIcon(icon);
+                                frame.card[playerhad].setBorder(BorderFactory.createLineBorder(Color.black, 1));
+                                frame.card[playerhad].setBounds(260+(playerhad-1)*120+(playerhad-1)*20, 450, 120, 160);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    time--;
+                    x++;
+                    x%=4;
                 }
             }
             else if(x==1&&botWantToDraw(bot1Point)&&bot1had<=5&&(bot1Point<=11&&bot1Point>=-11))
@@ -340,6 +405,9 @@ class MyGame extends Thread {
                 x%=4;
             }
         }
+        frame.Draw.setEnabled(false);
+        frame.NoDraw.setEnabled(false);
+        frame.countdown.setText("");
         //印出每個人的牌
 
         for(String key:playerCard.keySet())
