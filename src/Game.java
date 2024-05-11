@@ -1,13 +1,12 @@
 ﻿package src;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
 import java.util.HashMap;
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 
@@ -20,6 +19,7 @@ class Tuple<X, Y> {
         this.y = y;
     }
 }
+
 
 class MyJFrame extends JFrame implements ActionListener,Runnable{ 
     
@@ -59,7 +59,7 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
         setContentPane(contentPane);
 
         //background移至最底層
-        background.setIcon((scratch(new ImageIcon("Java--11points/src/image/background.png"), 1280, 720)));
+        background.setIcon((scratch(new ImageIcon("src/image/background.png"), 1280, 720)));
         background.setBounds(0, 0, 1280, 720);
         contentPane.add(background);
         contentPane.setComponentZOrder(background, 0);
@@ -70,7 +70,7 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
         Start.setContentAreaFilled(false);
         Start.setBorder(BorderFactory.createLineBorder(Color.black, 0));
         Start.setOpaque(false);
-        Start.setIcon(scratch(new ImageIcon("Java--11points/src/image/start.png"), 350, 150));
+        Start.setIcon(scratch(new ImageIcon("src/image/start.png"), 350, 150));
         contentPane.add(Start);
         contentPane.setComponentZOrder(Start, 0);
         Start.addActionListener(this);
@@ -81,7 +81,7 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
         Rule.setContentAreaFilled(false);
         Rule.setBorder(BorderFactory.createLineBorder(Color.black, 0));
         Rule.setOpaque(false);
-        Rule.setIcon(scratch(new ImageIcon("Java--11points/src/image/rule.png"), 350, 150));
+        Rule.setIcon(scratch(new ImageIcon("src/image/rule.png"), 350, 150));
         contentPane.add(Rule);
         contentPane.setComponentZOrder(Rule, 0);
         Rule.addActionListener(this);
@@ -91,7 +91,7 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
         Exit.setContentAreaFilled(false);
         Exit.setBorder(BorderFactory.createLineBorder(Color.black, 0));
         Exit.setOpaque(false);
-        Exit.setIcon(scratch(new ImageIcon("Java--11points/src/image/exit.png"), 350, 150));
+        Exit.setIcon(scratch(new ImageIcon("src/image/exit.png"), 350, 150));
         contentPane.add(Exit);
         contentPane.setComponentZOrder(Exit, 0);
         Exit.addActionListener(this);
@@ -109,49 +109,71 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
             setContentPane(MainPanel);
             MainPanel.setLayout(null);
             
+            
             MainPanel.add(Draw);
-            Draw.setBounds(1020, 600, 100, 60);
+            MainPanel.setComponentZOrder(Draw, 0);
+            Draw.setBounds(640, 600, 100, 60);
             Draw.setEnabled(false);
             Draw.addActionListener(this);
 
             MainPanel.add(NoDraw);
-            NoDraw.setBounds(1140, 600, 100, 60);
+            MainPanel.setComponentZOrder(NoDraw, 1);
+            NoDraw.setBounds(770, 600, 100, 60);
             NoDraw.setEnabled(false);
             NoDraw.addActionListener(this);
             
             MainPanel.add(Raise);
-            Raise.setBounds(1020, 500, 100, 60);
+            MainPanel.setComponentZOrder(Raise, 2);
+            Raise.setBounds(380, 600, 100, 60);
             Raise.addActionListener(this);
 
             MainPanel.add(NoRaise);
-            NoRaise.setBounds(1140, 500, 100, 60);
+            MainPanel.setComponentZOrder(NoRaise, 3);
+            NoRaise.setBounds(510, 600, 100, 60);
             NoRaise.addActionListener(this);
 
             JButton Exit = new JButton("離開");
             Exit.setBounds(1140, 10, 100, 60);
             Exit.addActionListener(this);
             MainPanel.add(Exit);
+            MainPanel.setComponentZOrder(Exit, 4);
+
+            JLabel gamebackground=new JLabel();
+            gamebackground.setIcon((scratch(new ImageIcon("src/image/gamebackground.jpg"), 1280, 720)));
+            gamebackground.setBounds(0, 0, 1280, 720);
+            MainPanel.add(gamebackground);
+            MainPanel.setComponentZOrder(gamebackground, 5);
 
             game.frame=this;
 
-            countdown.setBounds(1080, 400, 100, 60);
+            countdown.setBounds(975, 600, 300, 60);
+            countdown.setForeground(Color.white);
+            countdown.setFont(new Font("標楷體", Font.BOLD, 20));
             MainPanel.add(countdown);
+            MainPanel.setComponentZOrder(countdown, 0);
 
-            hint.setBounds(500, 300, 300, 60);
+            hint.setBounds(500, 330, 350, 60);
+            hint.setFont(new Font("標楷體", Font.BOLD, 20));
+            hint.setForeground(Color.white);
             MainPanel.add(hint);
+            MainPanel.setComponentZOrder(hint, 0);
 
             for(int i=0;i<4;++i)
             {
                 playerMoney[i]=new JLabel();
                 playerIcon[i]=new JLabel();
+                playerMoney[i].setForeground(Color.white);
                 MainPanel.add(playerIcon[i]);
+                MainPanel.setComponentZOrder(playerIcon[i], 0);
                 MainPanel.add(playerMoney[i]);
+                MainPanel.setComponentZOrder(playerMoney[i], 0);
             }
 
             for(int i=0;i<=5;++i)
             {
                 card[i]=new JLabel();
                 MainPanel.add(card[i]);
+                MainPanel.setComponentZOrder(card[i], 0);
             }
 
             game.start();
@@ -301,24 +323,24 @@ class MyGame extends Thread {
                 }
             }
             frame.playerMoney[0].setText(""+playerTotalMoney[0]);
-            frame.playerMoney[0].setBounds(30, 580, 200, 60);
-            frame.playerIcon[0].setBounds(30, 540, 60, 60);
-            frame.playerIcon[0].setIcon(frame.scratch(new ImageIcon("C:\\Users\\dogs2\\OneDrive\\文件\\1.jpg"), 60, 60));
+            frame.playerMoney[0].setBounds(605, 545, 200, 60);
+            frame.playerIcon[0].setBounds(590, 505, 60, 60);
+            frame.playerIcon[0].setIcon(frame.scratch(new ImageIcon("src/image/1.jpg"), 60, 60));
 
             frame.playerMoney[1].setText(""+playerTotalMoney[1]);
-            frame.playerMoney[1].setBounds(30, 300, 200, 60);
-            frame.playerIcon[1].setBounds(30, 260, 60, 60);
-            frame.playerIcon[1].setIcon(frame.scratch(new ImageIcon("C:\\Users\\dogs2\\OneDrive\\文件\\2.jpg"), 60, 60));
+            frame.playerMoney[1].setBounds(240, 360, 200, 60);
+            frame.playerIcon[1].setBounds(225, 320, 60, 60);
+            frame.playerIcon[1].setIcon(frame.scratch(new ImageIcon("src/image/2.jpg"), 60, 60));
 
             frame.playerMoney[2].setText(""+playerTotalMoney[2]);
-            frame.playerMoney[2].setBounds(700, 70, 200, 60);
-            frame.playerIcon[2].setBounds(700, 30, 60, 60);
-            frame.playerIcon[2].setIcon(frame.scratch(new ImageIcon("C:\\Users\\dogs2\\OneDrive\\文件\\3.jpg"), 60, 60));
+            frame.playerMoney[2].setBounds(605, 145, 200, 60);
+            frame.playerIcon[2].setBounds(590, 105, 60, 60);
+            frame.playerIcon[2].setIcon(frame.scratch(new ImageIcon("src/image/3.jpg"), 60, 60));
 
             frame.playerMoney[3].setText(""+playerTotalMoney[3]);
-            frame.playerMoney[3].setBounds(1100, 300, 200, 60);
-            frame.playerIcon[3].setBounds(1100, 260, 60, 60);
-            frame.playerIcon[3].setIcon(frame.scratch(new ImageIcon("C:\\Users\\dogs2\\OneDrive\\文件\\4.jpg"), 60, 60));
+            frame.playerMoney[3].setBounds(1015, 360, 200, 60);
+            frame.playerIcon[3].setBounds(1000, 320, 60, 60);
+            frame.playerIcon[3].setIcon(frame.scratch(new ImageIcon("src/image/4.jpg"), 60, 60));
             //隨機一個人開始抽牌各抽一張
             Random rand=new Random();
             int x=rand.nextInt(4);
@@ -345,25 +367,29 @@ class MyGame extends Thread {
                     Tuple<ArrayList<Integer>,ArrayList<Integer>> tuple=playerCard.get(key);
                     for(int i=0;i<tuple.x.size();++i)
                     {   
-                        frame.card[playerhad].setIcon(frame.scratch(new ImageIcon("Java--11points/src/image/"+Suit[tuple.x.get(i)]+(tuple.y.get(i)+1)+".png"), 120, 160));
+                        frame.card[playerhad].setIcon(frame.scratch(new ImageIcon("src/image/"+Suit[tuple.x.get(i)]+(tuple.y.get(i)+1)+".png"), 66, 88));
                         frame.card[playerhad].setBorder(BorderFactory.createLineBorder(Color.black, 1));
-                        frame.card[playerhad].setBounds(260, 450, 120, 160);
+                        frame.card[playerhad].setBounds(420, 400, 66, 88);
                         frame.card[playerhad].setVisible(true);
                     }
                 }
             }
+            
+
             //如果按下加注按鈕就繼續，暫停game20秒
             frame.hint.setText("請選擇是否加注");
+            int counter=0;
             tempTime=20;
             while(!frame.raise&&tempTime!=-1&&!frame.Draw.isEnabled())
             {
                 frame.countdown.setText("剩餘時間:"+tempTime);
                 try {
-                    TimeUnit.SECONDS.sleep(1);
+                    TimeUnit.MILLISECONDS.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                tempTime--;
+                counter++;
+                if(counter%10==0) tempTime--;
             }
             //加注
             while(time--!=0)
@@ -403,6 +429,20 @@ class MyGame extends Thread {
                 x++;
                 x%=4;
             }
+            if(playing==1) break;
+
+            frame.playerMoney[0].setText(""+playerTotalMoney[0]);
+            frame.playerMoney[1].setText(""+playerTotalMoney[1]);
+            frame.playerMoney[2].setText(""+playerTotalMoney[2]);
+            frame.playerMoney[3].setText(""+playerTotalMoney[3]);
+
+            frame.Raise.setEnabled(false);
+            frame.NoRaise.setEnabled(false);
+            frame.Draw.setEnabled(true);
+            frame.NoDraw.setEnabled(true);
+
+            tempTime=20;
+            counter=0;
             time=4;
             //選擇是否繼續抽牌
             while(time!=0)
@@ -415,11 +455,12 @@ class MyGame extends Thread {
                     {
                         frame.countdown.setText("剩餘時間:"+tempTime);
                         try {
-                            TimeUnit.SECONDS.sleep(1);
+                            TimeUnit.MILLISECONDS.sleep(100);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        tempTime--;
+                        counter++;
+                        if(counter%10==0) tempTime--;
                     }
                     if(frame.draw)
                     {
@@ -433,9 +474,9 @@ class MyGame extends Thread {
                                 Tuple<ArrayList<Integer>,ArrayList<Integer>> tuple=playerCard.get(key);
                                 for(int i=0;i<tuple.x.size();++i)
                                 {   
-                                    frame.card[playerhad].setIcon(frame.scratch(new ImageIcon("Java--11points/src/image/"+Suit[tuple.x.get(i)]+(tuple.y.get(i)+1)+".png"), 120, 160));
+                                    frame.card[playerhad].setIcon(frame.scratch(new ImageIcon("src/image/"+Suit[tuple.x.get(i)]+(tuple.y.get(i)+1)+".png"), 66, 88));
                                     frame.card[playerhad].setBorder(BorderFactory.createLineBorder(Color.black, 1));
-                                    frame.card[playerhad].setBounds(260+(playerhad-1)*120+(playerhad-1)*20, 450, 120, 160);
+                                    frame.card[playerhad].setBounds(420+(playerhad-1)*72+(playerhad-1)*16, 400, 66, 88);
                                     frame.card[playerhad].setVisible(true);
                                 }
                             }
