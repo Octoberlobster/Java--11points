@@ -1,4 +1,5 @@
 ﻿package src;
+import javax.sound.sampled.AudioInputStream;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -7,7 +8,9 @@ import java.util.Random;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
-
+import java.io.File;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 //Pair
 class Tuple<X, Y> {
@@ -21,7 +24,6 @@ class Tuple<X, Y> {
 
 
 class MyJFrame extends JFrame implements ActionListener,Runnable{ 
-    
     public JPanel contentPane;
     public JPanel MainPanel;
     public  boolean draw=false;
@@ -36,6 +38,8 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
     JLabel[] playerMoney=new JLabel[4];
     JLabel[] playerIcon=new JLabel[4];
     JLabel[] card=new JLabel[6];
+    Clip clip;
+    Clip BGM;
     MyGame game;
     //讓圖片大小符合label大小
     public ImageIcon scratch(ImageIcon icon,int width,int height)
@@ -47,6 +51,22 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
     }
     @Override
     public void run() {
+        try{
+            File file=new File("src/audio/start.wav");
+            AudioInputStream audioIn=AudioSystem.getAudioInputStream(file);
+            clip=AudioSystem.getClip();
+            clip.open(audioIn);
+            clip.start();
+            clip.loop(Clip.LOOP_CONTINUOUSLY);
+            File file2 =new File("src/audio/BGM.wav");
+            AudioInputStream audioIn2=AudioSystem.getAudioInputStream(file2);
+            BGM=AudioSystem.getClip();
+            BGM.open(audioIn2);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
         setBounds(100, 30, 1280, 720);
@@ -103,6 +123,9 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
     }
     public void actionPerformed(ActionEvent e) {
         if(e.getActionCommand().equals("開始遊戲")){
+            clip.stop();
+            BGM.start();
+            BGM.loop(Clip.LOOP_CONTINUOUSLY);
             MainPanel.setVisible(true);
             contentPane.setVisible(false);
             setContentPane(MainPanel);
@@ -111,28 +134,48 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
             
             MainPanel.add(Draw);
             MainPanel.setComponentZOrder(Draw, 0);
-            Draw.setBounds(640, 600, 100, 60);
+            Draw.setOpaque(false);
+            Draw.setContentAreaFilled(false);
+            Draw.setBorder(BorderFactory.createLineBorder(Color.WHITE, 0));
+            Draw.setIcon(scratch(new ImageIcon("src/image/Draw.png"), 150, 85));
+            Draw.setBounds(640, 580,150, 85);
             Draw.setEnabled(false);
             Draw.addActionListener(this);
 
             MainPanel.add(NoDraw);
             MainPanel.setComponentZOrder(NoDraw, 1);
-            NoDraw.setBounds(770, 600, 100, 60);
+            NoDraw.setOpaque(false);
+            NoDraw.setContentAreaFilled(false);
+            NoDraw.setBorder(BorderFactory.createLineBorder(Color.WHITE, 0));
+            NoDraw.setIcon(scratch(new ImageIcon("src/image/NoDraw.png"), 150, 85));
+            NoDraw.setBounds(780, 579, 150, 85);
             NoDraw.setEnabled(false);
             NoDraw.addActionListener(this);
             
             MainPanel.add(Raise);
             MainPanel.setComponentZOrder(Raise, 2);
-            Raise.setBounds(380, 600, 100, 60);
+            Raise.setOpaque(false);
+            Raise.setContentAreaFilled(false);
+            Raise.setBorder(BorderFactory.createLineBorder(Color.WHITE, 0));
+            Raise.setIcon(scratch(new ImageIcon("src/image/Raise.png"), 150, 85));
+            Raise.setBounds(320, 579, 150, 85);
             Raise.addActionListener(this);
 
             MainPanel.add(NoRaise);
             MainPanel.setComponentZOrder(NoRaise, 3);
-            NoRaise.setBounds(510, 600, 100, 60);
+            NoRaise.setOpaque(false);
+            NoRaise.setContentAreaFilled(false);
+            NoRaise.setBorder(BorderFactory.createLineBorder(Color.WHITE, 0));
+            NoRaise.setIcon(scratch(new ImageIcon("src/image/NoRaise.png"), 150, 85));
+            NoRaise.setBounds(460, 580, 150, 85);
             NoRaise.addActionListener(this);
 
             JButton Exit = new JButton("離開");
-            Exit.setBounds(1140, 10, 100, 60);
+            Exit.setOpaque(false);
+            Exit.setContentAreaFilled(false);
+            Exit.setBorder(BorderFactory.createLineBorder(Color.WHITE, 0));
+            Exit.setIcon(scratch(new ImageIcon("src/image/Exit_ingame.png"), 126, 43));
+            Exit.setBounds(1140, 10, 126, 43);
             Exit.addActionListener(this);
             MainPanel.add(Exit);
             MainPanel.setComponentZOrder(Exit, 4);
@@ -179,8 +222,8 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
         }
         else if(e.getActionCommand().equals("規則說明")){
             //html
-            //"1. 遊戲開始時，每位玩家和電腦各抽一張牌，並下注100元\n2. 玩家和電腦可以選擇是否要加注\n3. 玩家和電腦可以選擇是否要抽牌\n4. 玩家和電腦最多可以抽5張牌\n5. 玩家和電腦的點數最接近11點的人獲勝\n6. 如果有兩位以上的人點數相同，則看誰持有的牌數最多，再相同則平手"
-            JLabel label = new JLabel("<html>1. 遊戲開始時，每位玩家和電腦各抽一張牌，並下注100元<br>2. 玩家和電腦可以選擇是否要加注<br>3. 玩家和電腦可以選擇是否要抽牌<br>4. 玩家和電腦最多可以抽5張牌<br>5. 玩家和電腦的點數最接近11點的人獲勝<br>6. 如果有兩位以上的人點數相同，則看誰持有的牌數最多，再相同則平手</html>");
+            //"1. 遊戲開始時，每位玩家和電腦各抽一張牌，並下注100元\n2. 玩家和電腦可以選擇是否要加注\n3. 玩家和電腦可以選擇是否要抽牌\n4. 玩家和電腦最多可以抽5張牌\n5. 玩家和電腦的點數最接近0點的人獲勝\n6. 如果有兩位以上的人點數相同，則看誰持有的牌數最多，再相同則平手"
+            JLabel label = new JLabel("<html>1. 遊戲開始時，每位玩家和電腦各抽一張牌，並下注100元<br>2. 玩家和電腦可以選擇是否要加注<br>3. 玩家和電腦可以選擇是否要抽牌<br>4. 玩家和電腦最多可以抽5張牌<br>5. 玩家和電腦的點數最接近0點的人獲勝<br>6. 如果有兩位以上的人點數相同，則看誰持有的牌數最多，再相同則平手</html>");
             label.setFont(new Font("標楷體", Font.BOLD, 20));
             JOptionPane.showMessageDialog(null, label, "規則說明", JOptionPane.INFORMATION_MESSAGE);
         }
@@ -539,7 +582,10 @@ class MyGame extends Thread {
             if(bot2Point>11) outBound[2]=true;
             if(bot3Point>11) outBound[3]=true;
 
-            String result=player+" 's point:"+playerPoint+"\n"+bot1+" 's point:"+bot1Point+"\n"+bot2+" 's point:"+bot2Point+"\n"+bot3+" 's point:"+bot3Point+"\n";
+            String result=player+" 's point:"+playerPoint+" 玩家持有的牌數"+playerhad+"\n";
+            result+=bot1+" 's point:"+bot1Point+" 玩家持有的牌數"+bot1had+"\n";
+            result+=bot2+" 's point:"+bot2Point+" 玩家持有的牌數"+bot2had+"\n";
+            result+=bot3+" 's point:"+bot3Point+" 玩家持有的牌數"+bot3had+"\n";
             
             // System.out.println(player+" 's point:"+playerPoint);
             // System.out.println(bot1+" 's point:"+bot1Point);
@@ -744,6 +790,8 @@ class MyGame extends Thread {
             JOptionPane.showMessageDialog(null,result, "結果", JOptionPane.INFORMATION_MESSAGE);
             playing=JOptionPane.showConfirmDialog(null,"是否繼續遊玩", "再來一局", JOptionPane.YES_NO_OPTION);
         }
+        frame.clip.stop();
+        frame.BGM.stop();
         frame.run();
     }
 }
