@@ -39,6 +39,10 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
     JLabel[] playerIcon=new JLabel[4];
     JLabel[] card=new JLabel[6];
     Clip clip;
+    Clip DrawCard;
+    Clip RaiseCard;
+    Clip NoDrawCard;
+    Clip NoRaiseCard;
     MyGame game;
     //讓圖片大小符合label大小
     public ImageIcon scratch(ImageIcon icon,int width,int height)
@@ -57,7 +61,6 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
             clip.open(audioIn);
             clip.start();
             clip.loop(Clip.LOOP_CONTINUOUSLY);
-            
         }
         catch(Exception e)
         {
@@ -143,7 +146,7 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
             NoDraw.setContentAreaFilled(false);
             NoDraw.setBorder(BorderFactory.createLineBorder(Color.WHITE, 0));
             NoDraw.setIcon(scratch(new ImageIcon("src/image/NoDraw.png"), 150, 85));
-            NoDraw.setBounds(780, 579, 150, 85);
+            NoDraw.setBounds(800, 579, 150, 85);
             NoDraw.setEnabled(false);
             NoDraw.addActionListener(this);
             
@@ -153,7 +156,7 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
             Raise.setContentAreaFilled(false);
             Raise.setBorder(BorderFactory.createLineBorder(Color.WHITE, 0));
             Raise.setIcon(scratch(new ImageIcon("src/image/Raise.png"), 150, 85));
-            Raise.setBounds(320, 579, 150, 85);
+            Raise.setBounds(300, 579, 150, 85);
             Raise.addActionListener(this);
 
             MainPanel.add(NoRaise);
@@ -227,6 +230,18 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
         }
         else if(e.getActionCommand().equals("抽牌")){
             draw=true;
+            try
+            {
+                File file=new File("src/audio/抽牌.wav");
+                AudioInputStream audioIn=AudioSystem.getAudioInputStream(file);
+                DrawCard=AudioSystem.getClip();
+                DrawCard.open(audioIn);
+                DrawCard.start();
+            }
+            catch(Exception e2)
+            {
+                e2.printStackTrace();
+            }
         }
         else if(e.getActionCommand().equals("加注")){
             Raise.setEnabled(false);
@@ -234,16 +249,52 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
             NoRaise.setEnabled(false);
             Draw.setEnabled(true);
             NoDraw.setEnabled(true);
+            try
+            {
+                File file=new File("src/audio/加注.wav");
+                AudioInputStream audioIn=AudioSystem.getAudioInputStream(file);
+                RaiseCard=AudioSystem.getClip();
+                RaiseCard.open(audioIn);
+                RaiseCard.start();
+            }
+            catch(Exception e2)
+            {
+                e2.printStackTrace();
+            }
         }
         else if(e.getActionCommand().equals("不抽牌")){
             NoDraw.setEnabled(false);
             Draw.setEnabled(false);
+            try
+            {
+                File file=new File("src/audio/不抽牌.wav");
+                AudioInputStream audioIn=AudioSystem.getAudioInputStream(file);
+                NoDrawCard=AudioSystem.getClip();
+                NoDrawCard.open(audioIn);
+                NoDrawCard.start();
+            }
+            catch(Exception e2)
+            {
+                e2.printStackTrace();
+            }
         }
         else if(e.getActionCommand().equals("不加注")){
             NoRaise.setEnabled(false);
             Raise.setEnabled(false);
             Draw.setEnabled(true);
             NoDraw.setEnabled(true);
+            try
+            {
+                File file=new File("src/audio/不加注.wav");
+                AudioInputStream audioIn=AudioSystem.getAudioInputStream(file);
+                NoRaiseCard=AudioSystem.getClip();
+                NoRaiseCard.open(audioIn);
+                NoRaiseCard.start();
+            }
+            catch(Exception e2)
+            {
+                e2.printStackTrace();
+            }
         }
         else if(e.getActionCommand().equals("離開")){
             game.playing=1;
@@ -495,7 +546,6 @@ class MyGame extends Thread {
                     pot+=raise;
                     playerTotalMoney[x]-=raise;
                 }
-                time--;
                 x++;
                 x%=4;
             }
