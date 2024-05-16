@@ -39,7 +39,6 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
     JLabel[] playerIcon=new JLabel[4];
     JLabel[] card=new JLabel[6];
     Clip clip;
-    Clip BGM;
     MyGame game;
     //讓圖片大小符合label大小
     public ImageIcon scratch(ImageIcon icon,int width,int height)
@@ -58,10 +57,7 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
             clip.open(audioIn);
             clip.start();
             clip.loop(Clip.LOOP_CONTINUOUSLY);
-            File file2 =new File("src/audio/BGM.wav");
-            AudioInputStream audioIn2=AudioSystem.getAudioInputStream(file2);
-            BGM=AudioSystem.getClip();
-            BGM.open(audioIn2);
+            
         }
         catch(Exception e)
         {
@@ -124,8 +120,7 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
     public void actionPerformed(ActionEvent e) {
         if(e.getActionCommand().equals("開始遊戲")){
             clip.stop();
-            BGM.start();
-            BGM.loop(Clip.LOOP_CONTINUOUSLY);
+            
             MainPanel.setVisible(true);
             contentPane.setVisible(false);
             setContentPane(MainPanel);
@@ -330,10 +325,29 @@ class MyGame extends Thread {
         int tempTime=20;
         int playing=0;
         HashMap<String,Tuple<ArrayList<Integer>,ArrayList<Integer>>> playerCard=new HashMap<String,Tuple<ArrayList<Integer>,ArrayList<Integer>>>();
+        Clip BGM;
+        Clip BGM2;
 
     @Override
     public void run()
     {
+        try
+        {
+            File file,file2;
+            AudioInputStream audioIn,audioIn2;
+            file =new File("src/audio/BGM.wav");
+            audioIn=AudioSystem.getAudioInputStream(file);
+            file2=new File("src/audio/BGM2.wav");
+            audioIn2=AudioSystem.getAudioInputStream(file2);
+            BGM=AudioSystem.getClip();
+            BGM.open(audioIn);
+            BGM2=AudioSystem.getClip();
+            BGM2.open(audioIn2);
+        }
+        catch(Exception e2)
+        {
+            e2.printStackTrace();
+        }
         while(playing!=1){
             //初始化
             int playerPoint=0,bot1Point=0,bot2Point=0,bot3Point=0;
@@ -383,6 +397,20 @@ class MyGame extends Thread {
             frame.playerMoney[3].setBounds(1015, 360, 200, 60);
             frame.playerIcon[3].setBounds(1000, 320, 60, 60);
             frame.playerIcon[3].setIcon(frame.scratch(new ImageIcon("src/image/4.jpg"), 60, 60));
+
+            if(playerTotalMoney[0]>=0)
+            {
+                BGM.start();
+                BGM.loop(Clip.LOOP_CONTINUOUSLY);
+                BGM2.stop();
+            }
+            else
+            {
+                BGM2.start();
+                BGM2.loop(Clip.LOOP_CONTINUOUSLY);
+                BGM.stop();
+            }
+
             //隨機一個人開始抽牌各抽一張
             Random rand=new Random();
             int x=rand.nextInt(4);
@@ -791,7 +819,8 @@ class MyGame extends Thread {
             playing=JOptionPane.showConfirmDialog(null,"是否繼續遊玩", "再來一局", JOptionPane.YES_NO_OPTION);
         }
         frame.clip.stop();
-        frame.BGM.stop();
+        BGM.stop();
+        BGM2.stop();
         frame.run();
     }
 }
