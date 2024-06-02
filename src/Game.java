@@ -221,7 +221,7 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
         else if(e.getActionCommand().equals("規則說明")){
             //html
             //"1. 遊戲開始時，每位玩家和電腦各抽一張牌，並下注100元\n2. 玩家和電腦可以選擇是否要加注\n3. 玩家和電腦可以選擇是否要抽牌\n4. 玩家和電腦最多可以抽5張牌\n5. 玩家和電腦的點數最接近0點的人獲勝\n6. 如果有兩位以上的人點數相同，則看誰持有的牌數最多，再相同則平手"
-            JLabel label = new JLabel("<html>1. 遊戲開始時，每位玩家和電腦各抽一張牌，並下注100元<br>2. 玩家和電腦可以選擇是否要加注<br>3. 玩家和電腦可以選擇是否要抽牌<br>4. 玩家和電腦最多可以抽5張牌<br>5. 玩家和電腦的點數最接近0點的人獲勝<br>6. 如果有兩位以上的人點數相同，則看誰持有的牌數最多，再相同則平手</html>");
+            JLabel label = new JLabel("<html>1. 遊戲開始時，每位玩家和電腦各抽一張牌，並下注100元<br>2. 抽到的牌點數若為單數則將點數加入總和，若為雙數則總和減去該點數<br>3. 玩家和電腦可以選擇是否要加注<br>4. 玩家和電腦可以選擇是否要抽牌<br>5. 玩家和電腦最多可以抽5張牌<br>6. 玩家和電腦的點數最接近0點的人獲勝<br>7. 如果有兩位以上的人點數相同，則看誰持有的牌數最多，再相同則平手</html>");
             label.setFont(new Font("標楷體", Font.BOLD, 20));
             JOptionPane.showMessageDialog(null, label, "規則說明", JOptionPane.INFORMATION_MESSAGE);
         }
