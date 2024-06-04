@@ -221,7 +221,7 @@ class MyJFrame extends JFrame implements ActionListener,Runnable{
         else if(e.getActionCommand().equals("規則說明")){
             //html
             //"1. 遊戲開始時，每位玩家和電腦各抽一張牌，並下注100元\n2. 玩家和電腦可以選擇是否要加注\n3. 玩家和電腦可以選擇是否要抽牌\n4. 玩家和電腦最多可以抽5張牌\n5. 玩家和電腦的點數最接近0點的人獲勝\n6. 如果有兩位以上的人點數相同，則看誰持有的牌數最多，再相同則平手"
-            JLabel label = new JLabel("<html>1. 遊戲開始時，每位玩家和電腦各抽一張牌，並下注100元<br>2. 抽到的牌點數若為單數則將點數加入總和，若為雙數則總和減去該點數<br>3. 玩家和電腦可以選擇是否要加注<br>4. 玩家和電腦可以選擇是否要抽牌<br>5. 玩家和電腦最多可以抽5張牌<br>6. 玩家和電腦的點數最接近0點的人獲勝<br>7. 如果有兩位以上的人點數相同，則看誰持有的牌數最多，再相同則平手</html>");
+            JLabel label = new JLabel("<html>1. 遊戲開始時，每位玩家和電腦各抽一張牌，並下注100元<br>2. 抽到的牌點數若為單數則將點數加入總和，若為雙數則總和減去該點數<br>3. 玩家和電腦可以選擇是否要加注<br>4. 玩家和電腦可以選擇是否要抽牌<br>5. 玩家和電腦最多可以抽5張牌<br>6. 玩家和電腦的點數最接近0點的人獲勝<br>7. 如果有兩位以上的人點數相同，則看誰持有的牌數最多，再相同則平手<br>8. 如果有玩家的點數為0獲得的錢雙倍</html>");
             label.setFont(new Font("標楷體", Font.BOLD, 20));
             JOptionPane.showMessageDialog(null, label, "規則說明", JOptionPane.INFORMATION_MESSAGE);
         }
@@ -527,21 +527,21 @@ class MyGame extends Thread {
                 }
                 else if(x==1&&botWantToRaise(bot1Point,playerTotalMoney[x]))
                 {
-                    int raise=rand.nextInt(250);
+                    int raise=100;
                     playerBet[x]+=raise;
                     pot+=raise;
                     playerTotalMoney[x]-=raise;
                 }
                 else if(x==2&&botWantToRaise(bot2Point,playerTotalMoney[x]))
                 {
-                    int raise=rand.nextInt(250);
+                    int raise=100;
                     playerBet[x]+=raise;
                     pot+=raise;
                     playerTotalMoney[x]-=raise;
                 }
                 else if(x==3&&botWantToRaise(bot3Point,playerTotalMoney[x]))
                 {
-                    int raise=rand.nextInt(250);
+                    int raise=100;
                     playerBet[x]+=raise;
                     pot+=raise;
                     playerTotalMoney[x]-=raise;
@@ -706,6 +706,11 @@ class MyGame extends Thread {
                     }
                 }
             }
+
+            if(playerPoint==0) pot*=2;
+            else if(bot1Point==0) pot*=2;
+            else if(bot2Point==0) pot*=2;
+            else if(bot3Point==0) pot*=2;
             //分勝負
             for(int i=0;i<4;++i)
             {
